@@ -1,0 +1,18 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c0a2e"/>
+      <stop offset="100%" stop-color="#2d1b69"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background (iOS/Android icon format) -->
+  <rect width="1024" height="1024" rx="225" fill="url(#bg)"/>
+  <!-- White spark bolt, centered and scaled to fill ~60% of canvas -->
+  <!-- Original 100x100 viewBox points scaled ×10.24, offset to center -->
+  <!-- Original: 57,13 29,55 50,55 42,87 73,43 52,43 -->
+  <!-- Scale 10.24, then shift: x+=90, y+=89 -->
+  <polygon
+    points="674,222 387,652 602,652 520,980 837,529 622,529"
+    fill="white"
+  />
+</svg>

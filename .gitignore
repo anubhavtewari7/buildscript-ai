@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.npm
+
+# Build output
+dist/
+build/
+
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.*.local
+
+# Native project build artifacts (generated, not source)
+android/
+ios/
+
+# Vite
+.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS junk
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Capacitor
+.cache/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Keystore — never commit signing keys
+*.jks
+*.keystore
+*.p12
+*.mobileprovision

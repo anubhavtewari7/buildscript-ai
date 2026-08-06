@@ -1,0 +1,49 @@
+<svg width="360" height="72" viewBox="0 0 360 72" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="spark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e0e7ff"/>
+      <stop offset="100%" stop-color="#a5b4fc"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bare spark bolt, 48×48, vertically centered in 72px height, x=0 -->
+  <!-- Original 80×80 points scaled to 48: ×0.6, offset y+12 -->
+  <!-- 46,10→27.6,6+12=18 | 24,44→14.4,26.4+12=38.4 | 40,44→24,38.4 | 34,70→20.4,42+12=54 | 58,34→34.8,20.4+12=32.4 | 42,34→25.2,32.4 -->
+  <polygon
+    points="27.6,18 14.4,38.4 24,38.4 20.4,54 34.8,32.4 25.2,32.4"
+    fill="url(#spark)"
+  />
+
+  <!-- "Build" — heavy weight -->
+  <text
+    x="60"
+    y="44"
+    font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', sans-serif"
+    font-size="32"
+    font-weight="800"
+    letter-spacing="-1"
+    fill="#ffffff"
+  >Build</text>
+
+  <!-- "Script" — light weight -->
+  <text
+    x="154"
+    y="44"
+    font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', sans-serif"
+    font-size="32"
+    font-weight="300"
+    letter-spacing="-0.3"
+    fill="rgba(255,255,255,0.45)"
+  >Script</text>
+
+  <!-- Tagline -->
+  <text
+    x="61"
+    y="60"
+    font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'Segoe UI', sans-serif"
+    font-size="9"
+    font-weight="600"
+    letter-spacing="2.5"
+    fill="rgba(165,180,252,0.65)"
+  >AUTOMOTIVE INTELLIGENCE</text>
+</svg>
