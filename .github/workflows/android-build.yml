@@ -38,12 +38,19 @@ jobs:
           VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
           VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_REVENUECAT_GOOGLE_KEY: ${{ secrets.VITE_REVENUECAT_GOOGLE_KEY }}
 
       - name: Add Android platform
         run: npx cap add android
 
       - name: Sync Capacitor to Android
         run: npx cap sync android
+
+      - name: Set targetSdkVersion to 35
+        run: |
+          sed -i 's/targetSdkVersion = 34/targetSdkVersion = 35/g' android/variables.gradle
+          sed -i 's/compileSdkVersion = 34/compileSdkVersion = 35/g' android/variables.gradle
+          cat android/variables.gradle
 
       - name: Decode keystore
         run: |
@@ -67,6 +74,6 @@ jobs:
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: buildscript-ai-release-v1.0.0
+          name: buildscript-ai-release-v1.0.1
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
