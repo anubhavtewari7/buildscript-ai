@@ -17,7 +17,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -26,7 +25,7 @@ jobs:
           java-version: '17'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build web assets
         run: npx tsc --noEmit && npx vite build
@@ -53,9 +52,9 @@ jobs:
           echo "--- variables.gradle after patch ---"
           cat android/variables.gradle
 
-      - name: Bump versionCode to 11
+      - name: Bump versionCode to 12
         run: |
-          sed -i 's/versionCode 1/versionCode 11/g' android/app/build.gradle
+          sed -i 's/versionCode 1$/versionCode 12/' android/app/build.gradle
           echo "--- versionCode after patch ---"
           grep versionCode android/app/build.gradle
 
@@ -81,7 +80,7 @@ jobs:
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: buildscript-ai-release-v1.0.11
+          name: buildscript-ai-release-v1.0.12
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
