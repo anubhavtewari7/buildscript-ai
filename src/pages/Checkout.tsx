@@ -83,15 +83,20 @@ const Checkout: React.FC<CheckoutProps> = ({ uid, onProfileUpdate }) => {
   const handlePurchase = async (planKey: 'pro' | 'premium' | 'lifetime') => {
     setError('');
     setLoadingPlan(planKey);
+
     try {
       if (!isNative) {
+        // Web preview — simulate success so UI can be tested
         setError('In-app purchases are only available on the installed Android/iOS app.');
         setLoadingPlan(null);
         return;
       }
+
       const tier = planKey === 'lifetime' ? 'premium' : planKey;
       const rcKey = planKey === 'lifetime' ? 'premium' : planKey;
+
       const success = await purchaseSubscription(rcKey as 'pro' | 'premium');
+
       if (success) {
         await updateSubscriptionTier(uid, tier as SubscriptionTier);
         onProfileUpdate({ subscriptionTier: tier as SubscriptionTier });
@@ -101,7 +106,11 @@ const Checkout: React.FC<CheckoutProps> = ({ uid, onProfileUpdate }) => {
       }
     } catch (err: any) {
       const msg = err?.message || '';
-      if (!msg.toLowerCase().includes('cancel') && !err?.userCancelled) {
+      if (msg.toLowerCase().includes('cancel') || err?.userCancelled) {
+        // user dismissed — no error needed
+      } else if (msg === 'PAYMENTS_NOT_CONFIGURED') {
+        setError('Payments aren\'t activated yet — this is an early access build. Full billing will be enabled before public launch.');
+      } else {
         setError('Purchase failed. Please try again or contact support.');
       }
     } finally {
@@ -111,8 +120,12 @@ const Checkout: React.FC<CheckoutProps> = ({ uid, onProfileUpdate }) => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white pb-28" style={{ paddingTop: 'env(safe-area-inset-top, 0)' }}>
+      {/* Header */}
       <div className="flex items-center gap-3 px-5 pt-4 pb-2">
-        <button onClick={() => navigate(-1)} className="p-2 text-slate-400 hover:text-white active:scale-90 transition-all">
+        <button
+          onClick={() => navigate(-1)}
+          className="p-2 text-slate-400 hover:text-white active:scale-90 transition-all"
+        >
           <ArrowLeft size={22} />
         </button>
         <div>
@@ -122,6 +135,8 @@ const Checkout: React.FC<CheckoutProps> = ({ uid, onProfileUpdate }) => {
       </div>
 
       <div className="px-5 pt-4 space-y-4">
+
+        {/* Error */}
         {error && (
           <div className="flex items-start gap-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-semibold p-4 rounded-2xl">
             <AlertCircle size={16} className="mt-0.5 shrink-0" />
@@ -129,6 +144,7 @@ const Checkout: React.FC<CheckoutProps> = ({ uid, onProfileUpdate }) => {
           </div>
         )}
 
+        {/* Plan cards */}
         {PLANS.map(plan => {
           const c = colorMap[plan.color as keyof typeof colorMap];
           const Icon = plan.icon;
@@ -136,9 +152,15 @@ const Checkout: React.FC<CheckoutProps> = ({ uid, onProfileUpdate }) => {
           const isLoading = loadingPlan === plan.key;
 
           return (
-            <div key={plan.key} className={`rounded-2xl border p-5 transition-all ${
-              plan.badge ? `${c.ring} ring-1 bg-slate-900 border-slate-700` : 'bg-slate-900 border-slate-800'
-            }`}>
+            <div
+              key={plan.key}
+              className={`rounded-2xl border p-5 transition-all ${
+                plan.badge
+                  ? `${c.ring} ring-1 bg-slate-900 border-slate-700`
+                  : 'bg-slate-900 border-slate-800'
+              }`}
+            >
+              {/* Plan header */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl ${c.bg} flex items-center justify-center`}>
@@ -162,6 +184,7 @@ const Checkout: React.FC<CheckoutProps> = ({ uid, onProfileUpdate }) => {
                 </div>
               </div>
 
+              {/* Features */}
               <ul className="space-y-1.5 mb-4">
                 {plan.features.map(f => (
                   <li key={f} className="flex items-center gap-2 text-xs text-slate-300 font-medium">
@@ -171,6 +194,7 @@ const Checkout: React.FC<CheckoutProps> = ({ uid, onProfileUpdate }) => {
                 ))}
               </ul>
 
+              {/* CTA */}
               {isActive ? (
                 <div className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-400 text-xs font-black uppercase tracking-widest">
                   <CheckCircle2 size={14} />
@@ -182,13 +206,18 @@ const Checkout: React.FC<CheckoutProps> = ({ uid, onProfileUpdate }) => {
                   disabled={!!loadingPlan}
                   className={`w-full ${c.btn} text-white py-3.5 rounded-xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-50 transition-all active:scale-[0.97] shadow-xl`}
                 >
-                  {isLoading ? <Loader2 size={16} className="animate-spin" /> : `Get ${plan.name.split(' ').pop()}`}
+                  {isLoading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    `Get ${plan.name.split(' ').pop()}`
+                  )}
                 </button>
               )}
             </div>
           );
         })}
 
+        {/* Google Play trust note */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 flex items-start gap-3">
           <ShieldCheck size={16} className="text-emerald-400 mt-0.5 shrink-0" />
           <div>
@@ -200,14 +229,17 @@ const Checkout: React.FC<CheckoutProps> = ({ uid, onProfileUpdate }) => {
           </div>
         </div>
 
+        {/* 30-day guarantee */}
         <div className="text-center pb-4">
           <p className="text-[11px] text-slate-500 font-medium">
             30-day money-back guarantee · Cancel anytime · No hidden fees
           </p>
         </div>
+
       </div>
     </div>
   );
 };
 
 export default Checkout;
+
