@@ -26,11 +26,16 @@ const loadPurchases = async () => {
 export const initializePurchases = async (userId: string): Promise<void> => {
   if (!Capacitor.isNativePlatform()) return;
   try {
-    const RC = await loadPurchases();
     const apiKey = Capacitor.getPlatform() === 'ios'
       ? import.meta.env.VITE_REVENUECAT_APPLE_KEY
       : import.meta.env.VITE_REVENUECAT_GOOGLE_KEY;
 
+    if (!apiKey) {
+      console.warn('RevenueCat: API key not set. Purchases disabled.');
+      return;
+    }
+
+    const RC = await loadPurchases();
     await RC.configure({ apiKey });
     await RC.logIn({ appUserID: userId });
   } catch (err) {
@@ -56,6 +61,15 @@ export const purchaseSubscription = async (tier: 'pro' | 'premium'): Promise<boo
     console.warn('In-app purchases only work on native platforms (iOS/Android).');
     return false;
   }
+
+  const apiKey = Capacitor.getPlatform() === 'ios'
+    ? import.meta.env.VITE_REVENUECAT_APPLE_KEY
+    : import.meta.env.VITE_REVENUECAT_GOOGLE_KEY;
+
+  if (!apiKey) {
+    throw new Error('PAYMENTS_NOT_CONFIGURED');
+  }
+
   try {
     const RC = await loadPurchases();
     const offerings = await RC.getOfferings();
@@ -84,3 +98,4 @@ export const restorePurchases = async (): Promise<SubscriptionTier> => {
     return 'free';
   }
 };
+
