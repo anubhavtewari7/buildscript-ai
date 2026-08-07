@@ -52,9 +52,9 @@ jobs:
           echo "--- variables.gradle after patch ---"
           cat android/variables.gradle
 
-      - name: Bump versionCode to 12
+      - name: Bump versionCode to 13
         run: |
-          sed -i 's/versionCode 1$/versionCode 12/' android/app/build.gradle
+          sed -i 's/versionCode 1$/versionCode 13/' android/app/build.gradle
           echo "--- versionCode after patch ---"
           grep versionCode android/app/build.gradle
 
@@ -80,7 +80,7 @@ jobs:
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: buildscript-ai-release-v1.0.12
+          name: buildscript-ai-release-v1.0.13
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
