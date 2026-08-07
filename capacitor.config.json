@@ -2,9 +2,12 @@
   "appId": "com.buildscript.ai",
   "appName": "BuildScript AI",
   "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 0,
+      "launchShowDuration": 2000,
       "launchAutoHide": true,
       "backgroundColor": "#0f172a",
       "showSpinner": false
