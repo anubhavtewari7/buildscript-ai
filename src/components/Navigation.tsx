@@ -11,7 +11,10 @@ const NAV_ITEMS = [
 ];
 
 const Navigation: React.FC = () => (
-  <nav className="fixed bottom-0 left-0 right-0 z-40 max-w-md mx-auto bg-white border-t border-slate-100 shadow-2xl shadow-slate-900/10 pb-safe">
+  <nav
+    className="fixed bottom-0 left-0 right-0 z-40 max-w-md mx-auto bg-white border-t border-slate-100 shadow-2xl shadow-slate-900/10"
+    style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 20px)' }}
+  >
     <div className="flex items-center justify-around px-2 pt-2 pb-1">
       {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
         <NavLink key={to} to={to} end={to === '/'}
@@ -37,3 +40,4 @@ const Navigation: React.FC = () => (
 );
 
 export default Navigation;
+
