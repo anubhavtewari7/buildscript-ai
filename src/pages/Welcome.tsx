@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Mail, User as UserIcon, ArrowLeft, Loader2, AlertCircle, Lock, Car, Search, Wrench, ShoppingCart } from 'lucide-react';
+import { ChevronRight, Mail, User as UserIcon, ArrowLeft, Loader2, AlertCircle, Lock, Car, Search, Wrench, ShoppingCart, Eye, EyeOff } from 'lucide-react';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import { auth } from '../services/firebase';
 import { LogoMark, LogoWordmark } from '../components/Logo';
 import { registerUser, loginUser } from '../services/auth';
 import { Vehicle } from '../types';
@@ -223,6 +225,12 @@ const Welcome: React.FC<WelcomeProps> = ({ onAuthComplete }) => {
   const [fuelType, setFuelType] = useState<'gas' | 'diesel' | 'electric' | 'hybrid'>('gas');
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   useEffect(() => {
     if (mode !== 'onboarding') {
@@ -296,6 +304,22 @@ const Welcome: React.FC<WelcomeProps> = ({ onAuthComplete }) => {
     } finally { setLoading(false); }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetEmail) { setError('Enter your email address.'); return; }
+    setResetLoading(true); setError(null);
+    try {
+      await sendPasswordResetEmail(auth, resetEmail.trim());
+      setResetSent(true);
+    } catch (err: any) {
+      const msgs: Record<string, string> = {
+        'auth/user-not-found': 'No account found with this email.',
+        'auth/invalid-email': 'Please enter a valid email address.',
+      };
+      setError(msgs[err?.code] || 'Failed to send reset email.');
+    } finally { setResetLoading(false); }
+  };
+
   if (mode === 'onboarding') {
     return <Onboarding onDone={handleOnboardingDone} onSkip={handleOnboardingSkip} />;
   }
@@ -343,7 +367,12 @@ const Welcome: React.FC<WelcomeProps> = ({ onAuthComplete }) => {
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                  <input type="password" placeholder="Password (6+ characters)" required value={password} onChange={e => setPassword(e.target.value)} className={inputCls} />
+                  <input type={showSignupPassword ? 'text' : 'password'} placeholder="Password (6+ characters)" required value={password} onChange={e => setPassword(e.target.value)}
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-sm text-white placeholder:text-slate-500 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all" />
+                  <button type="button" onClick={() => setShowSignupPassword(p => !p)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
+                    {showSignupPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </>
             ) : (
@@ -375,20 +404,20 @@ const Welcome: React.FC<WelcomeProps> = ({ onAuthComplete }) => {
                 </div>
               </>
             )}
+            <button type="button" onClick={() => { setMode('login'); setError(null); }}
+              className="text-center text-slate-500 text-xs font-semibold py-2 hover:text-slate-300 transition-colors">
+              Already have an account? <span className="text-indigo-400">Sign in</span>
+            </button>
             <div className="flex-1" />
             <button type="submit" disabled={loading}
               className="w-full bg-white text-slate-950 py-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 disabled:opacity-50 transition-all active:scale-95 shadow-2xl">
               {loading ? <Loader2 size={20} className="animate-spin" /> : (signupStep === 1 ? <>Next <ChevronRight size={16} /></> : 'Launch BuildScript')}
             </button>
-            <button type="button" onClick={() => { setMode('login'); setError(null); }}
-              className="text-center text-slate-500 text-xs font-semibold py-2 hover:text-slate-300 transition-colors">
-              Already have an account? Sign in
-            </button>
           </form>
         )}
 
         {/* Login */}
-        {mode === 'login' && (
+        {mode === 'login' && !forgotMode && (
           <form onSubmit={handleLogin} className="flex-1 flex flex-col space-y-4">
             <div className="mb-1">
               <h2 className="text-2xl font-black">Welcome Back</h2>
@@ -400,16 +429,56 @@ const Welcome: React.FC<WelcomeProps> = ({ onAuthComplete }) => {
             </div>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-              <input type="password" placeholder="Password" required value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className={inputCls} />
+              <input type={showLoginPassword ? 'text' : 'password'} placeholder="Password" required value={loginPassword} onChange={e => setLoginPassword(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-sm text-white placeholder:text-slate-500 font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all" />
+              <button type="button" onClick={() => setShowLoginPassword(p => !p)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors">
+                {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
+            <button type="button" onClick={() => { setForgotMode(true); setResetEmail(loginEmail); setError(null); setResetSent(false); }}
+              className="text-right text-indigo-400 text-xs font-semibold hover:text-indigo-300 transition-colors -mt-2">
+              Forgot password?
+            </button>
+            <button type="button" onClick={() => { setMode('signup'); setError(null); setSignupStep(1); }}
+              className="text-center text-slate-500 text-xs font-semibold py-1 hover:text-slate-300 transition-colors">
+              Don't have an account? <span className="text-indigo-400">Create one</span>
+            </button>
             <div className="flex-1" />
             <button type="submit" disabled={loading}
               className="w-full bg-white text-slate-950 py-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 disabled:opacity-50 transition-all active:scale-95">
               {loading ? <Loader2 size={20} className="animate-spin" /> : 'Sign In'}
             </button>
-            <button type="button" onClick={() => { setMode('signup'); setError(null); setSignupStep(1); }}
+          </form>
+        )}
+
+        {/* Forgot Password */}
+        {mode === 'login' && forgotMode && (
+          <form onSubmit={handleForgotPassword} className="flex-1 flex flex-col space-y-4">
+            <div className="mb-1">
+              <h2 className="text-2xl font-black">Reset Password</h2>
+              <p className="text-slate-400 text-sm mt-1">We'll send a reset link to your email.</p>
+            </div>
+            {resetSent ? (
+              <div className="bg-green-500/10 border border-green-500/30 text-green-400 text-sm font-semibold p-4 rounded-2xl text-center">
+                ✓ Reset email sent! Check your inbox.
+              </div>
+            ) : (
+              <div className="relative">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+                <input type="email" placeholder="Email Address" required value={resetEmail} onChange={e => setResetEmail(e.target.value)} className={inputCls} />
+              </div>
+            )}
+            <div className="flex-1" />
+            {!resetSent && (
+              <button type="submit" disabled={resetLoading}
+                className="w-full bg-white text-slate-950 py-5 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 disabled:opacity-50 transition-all active:scale-95">
+                {resetLoading ? <Loader2 size={20} className="animate-spin" /> : 'Send Reset Link'}
+              </button>
+            )}
+            <button type="button" onClick={() => { setForgotMode(false); setError(null); }}
               className="text-center text-slate-500 text-xs font-semibold py-2 hover:text-slate-300 transition-colors">
-              Don't have an account? Create one
+              ← Back to Sign In
             </button>
           </form>
         )}
@@ -419,3 +488,4 @@ const Welcome: React.FC<WelcomeProps> = ({ onAuthComplete }) => {
 };
 
 export default Welcome;
+
